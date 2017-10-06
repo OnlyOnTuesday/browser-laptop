@@ -5,18 +5,27 @@
 const React = require('react')
 const {StyleSheet, css} = require('aphrodite')
 const globalStyles = require('../../app/renderer/components/styles/global')
+const privateTabIcon = require('../../app/extensions/brave/img/newtab/private_tab_pagearea_icon.svg')
+const {SettingCheckbox} = require('../../app/renderer/components/common/settings')
+const settings = require('../constants/settings')
 const Stats = require('./newTabComponents/stats')
 const Clock = require('./newTabComponents/clock')
-const privateTabIcon = require('../../app/extensions/brave/img/newtab/private_tab_pagearea_icon.svg')
+const aboutActions = require('./aboutActions')
+
 // TODO: remove it once we use Aphrodite on stats and clock components
 require('../../less/about/newtab.less')
 
+const useAlternativePrivateSearchEngineDataKeys = ['newTabDetail', 'useAlternativePrivateSearchEngine']
+
 class NewPrivateTab extends React.Component {
+  onChangePrivateSearch (e) {
+    aboutActions.changeSetting(settings.USE_ALTERNATIVE_PRIVATE_SEARCH_ENGINE, e.target.value)
+  }
+
   render () {
     if (!this.props.newTabData) {
       return null
     }
-
     return <div data-test-id='privateTabContent' className={css(styles.newPrivateTab)}>
       <div className='statsBar'>
         <Stats newTabData={this.props.newTabData} />
@@ -29,6 +38,17 @@ class NewPrivateTab extends React.Component {
           <p className={css(styles.text)} data-l10n-id='privateTabText1' />
           <p className={css(styles.text)} data-l10n-id='privateTabText2' />
           <p className={css(styles.text, styles.italic)} data-l10n-id='privateTabText3' />
+          <h2 className={css(styles.sectionTitle)} data-l10n-id='privateTabSearchSectionTitle' />
+          <p className={css(styles.text)} data-l10n-id='privateTabSearchText1' />
+          {
+            this.props.newTabData.hasIn(useAlternativePrivateSearchEngineDataKeys) &&
+            <SettingCheckbox
+              dataL10nId='useDuckDuckGoForPrivateSearch'
+              checked={Boolean(this.props.newTabData.getIn(useAlternativePrivateSearchEngineDataKeys))}
+              onChange={this.onChangePrivateSearch.bind(this)}
+              rightLabelClassName={css(styles.newPrivateTab__switch__label)}
+            />
+          }
         </div>
       </div>
     </div>
@@ -91,6 +111,12 @@ const styles = StyleSheet.create({
     marginBottom: globalStyles.spacing.privateTabPaddingHorizontal
   },
 
+  sectionTitle: {
+    color: globalStyles.color.white100,
+    fontSize: '24px',
+    marginBottom: globalStyles.spacing.privateTabPaddingHorizontal
+  },
+
   text: {
     paddingBottom: globalStyles.spacing.privateTabPaddingHorizontal,
     lineHeight: '1.5',
@@ -100,6 +126,10 @@ const styles = StyleSheet.create({
 
   italic: {
     fontStyle: 'italic'
+  },
+
+  newPrivateTab__switch__label: {
+    color: globalStyles.color.alphaWhite
   }
 })
 
